@@ -389,6 +389,11 @@ We welcome contributions! Please:
 2. Create a feature branch
 3. Submit a pull request with clear description
 
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see LICENSE file for details.
 
 ---
 
@@ -408,14 +413,13 @@ Built for credit unions to compete effectively in an evolving financial services
 
 For questions or issues:
 - Create a GitHub issue
-- Email: support@your-org.com
 - Documentation: [Wiki](https://github.com/your-org/transaction-analysis/wiki)
 
 ---
 
 **Last Updated:** November 2025  
 **Version:** 1.0.0  
-**Maintained By:** Your Organization
+**Maintained By:** Me
 
 ---
 
