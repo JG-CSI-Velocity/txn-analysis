@@ -1,0 +1,42 @@
+# ===========================================================================
+# M6B-4: BUSINESS VS PERSONAL SPLIT
+# ===========================================================================
+
+print("\n" + "="*120)
+print(" " * 40 + "M6B-4: BUSINESS VS PERSONAL ACCOUNT SPLIT")
+print("="*120)
+
+if len(all_competitor_data) > 0:
+    # Combine all competitor transactions
+    all_competitor_trans = pd.concat(all_competitor_data.values(), ignore_index=True)
+    
+    if 'business_flag' in all_competitor_trans.columns:
+        business_split = all_competitor_trans.groupby('business_flag').agg({
+            'amount': ['sum', 'count', 'mean'],
+            'primary_account_num': 'nunique'
+        }).round(2)
+        
+        business_split.columns = ['Total Spend', 'Transaction Count', 'Avg Transaction', 'Unique Accounts']
+        
+        # Add percentages
+        business_split['% of Competitor Spend'] = (
+            business_split['Total Spend'] / business_split['Total Spend'].sum() * 100
+        )
+        business_split['% of Competitor Accounts'] = (
+            business_split['Unique Accounts'] / business_split['Unique Accounts'].sum() * 100
+        )
+        
+        business_display = business_split.copy()
+        business_display.index = business_display.index.map({'Yes': '💼 Business Accounts', 'No': '👤 Personal Accounts'})
+        business_display['Total Spend'] = business_display['Total Spend'].apply(lambda x: f"${x:,.2f}")
+        business_display['Transaction Count'] = business_display['Transaction Count'].apply(lambda x: f"{int(x):,}")
+        business_display['Avg Transaction'] = business_display['Avg Transaction'].apply(lambda x: f"${x:,.2f}")
+        business_display['Unique Accounts'] = business_display['Unique Accounts'].apply(lambda x: f"{int(x):,}")
+        business_display['% of Competitor Spend'] = business_display['% of Competitor Spend'].apply(lambda x: f"{x:.1f}%")
+        business_display['% of Competitor Accounts'] = business_display['% of Competitor Accounts'].apply(lambda x: f"{x:.1f}%")
+        
+        display(business_display)
+    else:
+        print("\n⚠ No business_flag column found in competitor data")
+
+print("="*120)
