@@ -1,0 +1,351 @@
+# ===========================================================================
+# M6B: COMPETITOR ANALYSIS — VISUALIZATIONS & DYNAMIC INSIGHTS
+# ===========================================================================
+# Requires: competitor_txns, combined_df, personal_df with competitor tags
+# ===========================================================================
+
+TRUE_COMPETITORS = ['big_nationals', 'regionals', 'credit_unions', 'digital_banks']
+PAYMENT_ECOSYSTEMS = ['wallets_p2p', 'bnpl']
+
+true_comp = combined_df[combined_df['competitor_category'].isin(TRUE_COMPETITORS)].copy()
+ecosystem = combined_df[combined_df['competitor_category'].isin(PAYMENT_ECOSYSTEMS)].copy()
+
+total_spend = combined_df['amount'].sum()
+comp_spend = true_comp['amount'].sum()
+eco_spend = ecosystem['amount'].sum()
+comp_accounts = true_comp['primary_account_num'].nunique()
+total_accounts = combined_df['primary_account_num'].nunique()
+
+# ===========================================================================
+# VISUALIZATION 1: Executive Summary Dashboard
+# ===========================================================================
+
+fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+fig.suptitle('M6: Competitive Threat Analysis', fontsize=16, fontweight='bold', y=1.02)
+
+# --- 1A: Spend context pie (top-left) ---
+ax = axes[0, 0]
+sizes = [comp_spend, eco_spend, total_spend - comp_spend - eco_spend]
+labels = [
+    f'Competitor\n${comp_spend:,.0f}',
+    f'Wallets/P2P\n${eco_spend:,.0f}',
+    f'Normal Spend\n${total_spend - comp_spend - eco_spend:,.0f}'
+]
+colors_pie = ['#e74c3c', '#f39c12', '#2ecc71']
+explode = (0.08, 0.04, 0)
+wedges, texts, autotexts = ax.pie(
+    sizes, labels=labels, colors=colors_pie, explode=explode,
+    autopct='%1.2f%%', startangle=90, textprops={'fontsize': 8}
+)
+for t in autotexts:
+    t.set_fontsize(8)
+    t.set_fontweight('bold')
+ax.set_title('Spend Breakdown', fontsize=11, fontweight='bold')
+
+# --- 1B: Spend by competitor category (top-middle) ---
+ax = axes[0, 1]
+cat_spend = true_comp.groupby('competitor_category')['amount'].sum().sort_values(ascending=True)
+cat_colors = {'big_nationals': '#c0392b', 'regionals': '#e67e22', 
+              'credit_unions': '#2980b9', 'digital_banks': '#8e44ad'}
+bar_colors = [cat_colors.get(c, '#95a5a6') for c in cat_spend.index]
+bars = ax.barh(
+    [c.replace('_', ' ').title() for c in cat_spend.index],
+    cat_spend.values, color=bar_colors, edgecolor='black', linewidth=0.5
+)
+for bar, val in zip(bars, cat_spend.values):
+    ax.text(bar.get_width() + cat_spend.max() * 0.02, bar.get_y() + bar.get_height()/2,
+            f'${val:,.0f}', va='center', fontsize=9, fontweight='bold')
+ax.set_xlabel('Total Spend ($)', fontsize=10, fontweight='bold')
+ax.set_title('Competitor Spend by Category', fontsize=11, fontweight='bold')
+ax.grid(axis='x', linestyle='--', alpha=0.3)
+ax.set_axisbelow(True)
+
+# --- 1C: Account exposure by category (top-right) ---
+ax = axes[0, 2]
+cat_accts = true_comp.groupby('competitor_category')['primary_account_num'].nunique().sort_values(ascending=True)
+bar_colors2 = [cat_colors.get(c, '#95a5a6') for c in cat_accts.index]
+bars2 = ax.barh(
+    [c.replace('_', ' ').title() for c in cat_accts.index],
+    cat_accts.values, color=bar_colors2, edgecolor='black', linewidth=0.5
+)
+for bar, val in zip(bars2, cat_accts.values):
+    ax.text(bar.get_width() + cat_accts.max() * 0.02, bar.get_y() + bar.get_height()/2,
+            f'{val:,}', va='center', fontsize=9, fontweight='bold')
+ax.set_xlabel('Unique Accounts', fontsize=10, fontweight='bold')
+ax.set_title('Members with Competitor Activity', fontsize=11, fontweight='bold')
+ax.grid(axis='x', linestyle='--', alpha=0.3)
+ax.set_axisbelow(True)
+
+# --- 1D: Top 10 individual competitors by spend (bottom-left) ---
+ax = axes[1, 0]
+top_comps = true_comp.groupby('competitor_match').agg(
+    spend=('amount', 'sum'),
+    category=('competitor_category', 'first')
+).sort_values('spend', ascending=True).tail(10)
+bar_colors3 = [cat_colors.get(c, '#95a5a6') for c in top_comps['category']]
+bars3 = ax.barh(top_comps.index, top_comps['spend'], color=bar_colors3,
+                edgecolor='black', linewidth=0.5)
+for bar, val in zip(bars3, top_comps['spend']):
+    ax.text(bar.get_width() + top_comps['spend'].max() * 0.02, 
+            bar.get_y() + bar.get_height()/2,
+            f'${val:,.0f}', va='center', fontsize=8, fontweight='bold')
+ax.set_xlabel('Total Spend ($)', fontsize=10, fontweight='bold')
+ax.set_title('Top 10 Competitors by Spend', fontsize=11, fontweight='bold')
+ax.grid(axis='x', linestyle='--', alpha=0.3)
+ax.set_axisbelow(True)
+
+# --- 1E: Top 10 individual competitors by accounts (bottom-middle) ---
+ax = axes[1, 1]
+top_comps_acct = true_comp.groupby('competitor_match').agg(
+    accounts=('primary_account_num', 'nunique'),
+    category=('competitor_category', 'first')
+).sort_values('accounts', ascending=True).tail(10)
+bar_colors4 = [cat_colors.get(c, '#95a5a6') for c in top_comps_acct['category']]
+bars4 = ax.barh(top_comps_acct.index, top_comps_acct['accounts'], color=bar_colors4,
+                edgecolor='black', linewidth=0.5)
+for bar, val in zip(bars4, top_comps_acct['accounts']):
+    ax.text(bar.get_width() + top_comps_acct['accounts'].max() * 0.02,
+            bar.get_y() + bar.get_height()/2,
+            f'{val:,}', va='center', fontsize=8, fontweight='bold')
+ax.set_xlabel('Unique Accounts', fontsize=10, fontweight='bold')
+ax.set_title('Top 10 Competitors by Reach', fontsize=11, fontweight='bold')
+ax.grid(axis='x', linestyle='--', alpha=0.3)
+ax.set_axisbelow(True)
+
+# --- 1F: Monthly competitor trend (bottom-right) ---
+ax = axes[1, 2]
+if 'year_month' in true_comp.columns and len(true_comp) > 0:
+    monthly = true_comp.groupby(['year_month', 'competitor_category'])['amount'].sum().unstack(fill_value=0)
+    monthly.index = monthly.index.astype(str)
+    cat_order = [c for c in TRUE_COMPETITORS if c in monthly.columns]
+    monthly_plot = monthly[cat_order]
+    monthly_plot.plot(
+        kind='bar', stacked=True, ax=ax,
+        color=[cat_colors.get(c, '#95a5a6') for c in cat_order],
+        edgecolor='black', linewidth=0.3, width=0.8
+    )
+    ax.set_ylabel('Spend ($)', fontsize=10, fontweight='bold')
+    ax.set_title('Monthly Competitor Spend Trend', fontsize=11, fontweight='bold')
+    ax.legend(
+        [c.replace('_', ' ').title() for c in cat_order],
+        fontsize=7, loc='upper left'
+    )
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'${x/1e3:.0f}K' if x >= 1000 else f'${x:.0f}'))
+    plt.setp(ax.get_xticklabels(), rotation=45, ha='right', fontsize=7)
+    ax.grid(axis='y', linestyle='--', alpha=0.3)
+    ax.set_axisbelow(True)
+else:
+    ax.text(0.5, 0.5, 'No monthly data available', ha='center', va='center', fontsize=11)
+    ax.set_title('Monthly Trend', fontsize=11, fontweight='bold')
+
+plt.tight_layout()
+plt.show()
+
+
+# ===========================================================================
+# VISUALIZATION 2: Payment Ecosystem Context (separate section)
+# ===========================================================================
+
+if len(ecosystem) > 0:
+    fig2, axes2 = plt.subplots(1, 2, figsize=(14, 5))
+    fig2.suptitle('Payment Ecosystem Activity (Not Competitive Loss — Card Usage Volume)',
+                  fontsize=13, fontweight='bold', y=1.02, color='#7f8c8d')
+
+    # Wallet/P2P spend breakdown
+    ax = axes2[0]
+    eco_by_match = ecosystem.groupby('competitor_match')['amount'].sum().sort_values(ascending=True).tail(8)
+    bars_e = ax.barh(eco_by_match.index, eco_by_match.values, color='#f39c12',
+                     edgecolor='black', linewidth=0.5)
+    for bar, val in zip(bars_e, eco_by_match.values):
+        ax.text(bar.get_width() + eco_by_match.max() * 0.02,
+                bar.get_y() + bar.get_height()/2,
+                f'${val:,.0f}', va='center', fontsize=9, fontweight='bold')
+    ax.set_xlabel('Spend Volume ($)', fontsize=10, fontweight='bold')
+    ax.set_title('Wallet & P2P Volume', fontsize=11, fontweight='bold')
+    ax.grid(axis='x', linestyle='--', alpha=0.3)
+    ax.set_axisbelow(True)
+
+    # Wallet/P2P account reach
+    ax = axes2[1]
+    eco_by_accts = ecosystem.groupby('competitor_match')['primary_account_num'].nunique().sort_values(ascending=True).tail(8)
+    bars_e2 = ax.barh(eco_by_accts.index, eco_by_accts.values, color='#f39c12',
+                      edgecolor='black', linewidth=0.5)
+    for bar, val in zip(bars_e2, eco_by_accts.values):
+        ax.text(bar.get_width() + eco_by_accts.max() * 0.02,
+                bar.get_y() + bar.get_height()/2,
+                f'{val:,}', va='center', fontsize=9, fontweight='bold')
+    ax.set_xlabel('Unique Accounts', fontsize=10, fontweight='bold')
+    ax.set_title('Wallet & P2P Member Reach', fontsize=11, fontweight='bold')
+    ax.grid(axis='x', linestyle='--', alpha=0.3)
+    ax.set_axisbelow(True)
+
+    plt.tight_layout()
+    plt.show()
+
+
+# ===========================================================================
+# DYNAMIC INSIGHTS — Narrative generator
+# ===========================================================================
+
+print("\n" + "="*120)
+print(" " * 35 + "M6: COMPETITIVE INTELLIGENCE — KEY FINDINGS")
+print("="*120)
+
+# --- Insight 1: Scale & severity ---
+comp_pct = (comp_spend / total_spend * 100) if total_spend > 0 else 0
+acct_pct = (comp_accounts / total_accounts * 100) if total_accounts > 0 else 0
+
+if comp_pct < 0.5:
+    severity = "minimal"
+    severity_detail = "competitive leakage is well contained"
+elif comp_pct < 2:
+    severity = "moderate"
+    severity_detail = "there is meaningful but manageable competitive exposure"
+else:
+    severity = "significant"
+    severity_detail = "competitive leakage warrants immediate strategic attention"
+
+print(f"\n{'─'*120}")
+print(f"  1. COMPETITIVE EXPOSURE SUMMARY")
+print(f"{'─'*120}")
+print(f"  • {comp_accounts:,} members ({acct_pct:.1f}% of membership) sent ${comp_spend:,.0f} to competitor institutions")
+print(f"  • This represents {comp_pct:.2f}% of total card spend — {severity_detail}")
+print(f"  • Separately, ${eco_spend:,.0f} flowed through payment platforms (Venmo, PayPal, etc.) via Connex cards")
+
+# --- Insight 2: Top threat ---
+if len(true_comp) > 0:
+    top_threat = true_comp.groupby('competitor_match').agg(
+        spend=('amount', 'sum'),
+        accounts=('primary_account_num', 'nunique'),
+        category=('competitor_category', 'first')
+    ).sort_values('spend', ascending=False)
+    
+    top1 = top_threat.iloc[0]
+    top1_name = top_threat.index[0]
+    top1_cat = top1['category'].replace('_', ' ').title()
+    top1_pct = (top1['spend'] / comp_spend * 100) if comp_spend > 0 else 0
+
+    print(f"\n{'─'*120}")
+    print(f"  2. PRIMARY COMPETITIVE THREAT")
+    print(f"{'─'*120}")
+    print(f"  • {top1_name} ({top1_cat}) is the #1 competitor destination")
+    print(f"    — ${top1['spend']:,.0f} in spend ({top1_pct:.1f}% of all competitor flow)")
+    print(f"    — {top1['accounts']:,} unique member accounts affected")
+
+    if len(top_threat) >= 3:
+        top3_spend = top_threat.head(3)['spend'].sum()
+        top3_pct = (top3_spend / comp_spend * 100) if comp_spend > 0 else 0
+        top3_names = ', '.join(top_threat.head(3).index.tolist())
+        print(f"  • Top 3 competitors ({top3_names}) account for {top3_pct:.0f}% of all competitive spend")
+
+# --- Insight 3: Category breakdown ---
+if len(true_comp) > 0:
+    cat_summary = true_comp.groupby('competitor_category').agg(
+        spend=('amount', 'sum'),
+        accounts=('primary_account_num', 'nunique'),
+        txns=('amount', 'count')
+    ).sort_values('spend', ascending=False)
+
+    print(f"\n{'─'*120}")
+    print(f"  3. THREAT BY CATEGORY")
+    print(f"{'─'*120}")
+    
+    for cat, row in cat_summary.iterrows():
+        cat_pct = (row['spend'] / comp_spend * 100) if comp_spend > 0 else 0
+        avg_per_acct = row['spend'] / row['accounts'] if row['accounts'] > 0 else 0
+        display_cat = cat.replace('_', ' ').title()
+        print(f"  • {display_cat:20s}  ${row['spend']:>10,.0f}  ({cat_pct:5.1f}%)  "
+              f"{row['accounts']:>5,} accounts  avg ${avg_per_acct:,.0f}/member")
+
+# --- Insight 4: High-value at-risk members ---
+if len(true_comp) > 0:
+    member_comp_spend = true_comp.groupby('primary_account_num').agg(
+        comp_spend=('amount', 'sum'),
+        comp_txns=('amount', 'count'),
+        competitors_used=('competitor_match', 'nunique'),
+        top_competitor=('competitor_match', lambda x: x.value_counts().index[0])
+    ).sort_values('comp_spend', ascending=False)
+
+    high_risk = member_comp_spend[member_comp_spend['comp_spend'] >= member_comp_spend['comp_spend'].quantile(0.9)]
+    multi_comp = member_comp_spend[member_comp_spend['competitors_used'] >= 2]
+
+    print(f"\n{'─'*120}")
+    print(f"  4. AT-RISK MEMBER SEGMENTS")
+    print(f"{'─'*120}")
+    print(f"  • {len(high_risk):,} high-value at-risk members (top 10% by competitor spend)")
+    print(f"    — Combined spend to competitors: ${high_risk['comp_spend'].sum():,.0f}")
+    print(f"    — Average competitor spend: ${high_risk['comp_spend'].mean():,.0f} per member")
+    print(f"  • {len(multi_comp):,} members use 2+ competitor institutions (highest flight risk)")
+    if len(multi_comp) > 0:
+        print(f"    — Combined spend to competitors: ${multi_comp['comp_spend'].sum():,.0f}")
+
+    # Top competitor per at-risk members
+    top_dest = high_risk['top_competitor'].value_counts().head(3)
+    if len(top_dest) > 0:
+        print(f"  • Where high-risk members are going:")
+        for dest, count in top_dest.items():
+            print(f"    — {dest}: {count:,} members")
+
+# --- Insight 5: Trend direction ---
+if 'year_month' in true_comp.columns and true_comp['year_month'].nunique() >= 3:
+    monthly_spend = true_comp.groupby('year_month')['amount'].sum().sort_index()
+    
+    if len(monthly_spend) >= 4:
+        recent_3 = monthly_spend.tail(3).mean()
+        prior_3 = monthly_spend.iloc[-6:-3].mean() if len(monthly_spend) >= 6 else monthly_spend.head(3).mean()
+        
+        if prior_3 > 0:
+            trend_pct = ((recent_3 - prior_3) / prior_3) * 100
+            trend_dir = "increasing" if trend_pct > 5 else "decreasing" if trend_pct < -5 else "stable"
+            
+            print(f"\n{'─'*120}")
+            print(f"  5. TREND DIRECTION")
+            print(f"{'─'*120}")
+            print(f"  • Competitor spend is {trend_dir} ({trend_pct:+.1f}% change, recent 3mo avg vs prior 3mo avg)")
+            print(f"    — Recent 3-month average: ${recent_3:,.0f}/month")
+            print(f"    — Prior 3-month average:  ${prior_3:,.0f}/month")
+            
+            if trend_dir == "increasing":
+                print(f"  • ⚠ Rising competitive outflows suggest members may be deepening external relationships")
+            elif trend_dir == "decreasing":
+                print(f"  • ✓ Declining competitive outflows suggest improving member retention")
+
+# --- Insight 6: Wallet/P2P context ---
+if len(ecosystem) > 0:
+    eco_accounts = ecosystem['primary_account_num'].nunique()
+    eco_acct_pct = (eco_accounts / total_accounts * 100) if total_accounts > 0 else 0
+    
+    print(f"\n{'─'*120}")
+    print(f"  6. PAYMENT ECOSYSTEM CONTEXT")
+    print(f"{'─'*120}")
+    print(f"  • {eco_accounts:,} members ({eco_acct_pct:.1f}%) use payment platforms via their Connex card")
+    print(f"  • ${eco_spend:,.0f} in total volume — this is card USAGE, not competitive loss")
+    print(f"  • However, these members are acclimated to fintech — they represent future attrition risk")
+    print(f"    if platforms expand to direct deposit, savings, or lending products")
+    
+    # Overlap: members who use BOTH competitors AND wallets
+    comp_members = set(true_comp['primary_account_num'].unique())
+    eco_members = set(ecosystem['primary_account_num'].unique())
+    overlap = comp_members & eco_members
+    
+    if len(overlap) > 0:
+        print(f"  • {len(overlap):,} members use BOTH competitors AND payment platforms — highest risk segment")
+
+# --- Insight 7: Actionable recommendations ---
+print(f"\n{'─'*120}")
+print(f"  7. RECOMMENDED ACTIONS")
+print(f"{'─'*120}")
+
+if len(true_comp) > 0:
+    top_cat = cat_summary.index[0].replace('_', ' ').title()
+    print(f"  1. RETAIN: Target the {len(high_risk):,} high-value at-risk members with personalized outreach")
+    print(f"  2. COMPETE: Primary competitive pressure comes from {top_cat} — review rate/product positioning")
+    
+    if len(multi_comp) > 0:
+        print(f"  3. PRIORITIZE: {len(multi_comp):,} multi-competitor members are closest to full attrition")
+    
+    if len(ecosystem) > 0 and eco_acct_pct > 30:
+        print(f"  4. INNOVATE: {eco_acct_pct:.0f}% of members are active on fintech platforms —")
+        print(f"     consider Zelle promotion, P2P integration, or digital wallet partnerships")
+
+print(f"\n{'='*120}")
