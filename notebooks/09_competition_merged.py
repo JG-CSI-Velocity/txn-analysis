@@ -1,7 +1,7 @@
 # 09_competition_merged.py
 # M6A: COMPETITOR CONFIGURATION & DETECTION (MERGED)
-# Client: 1453 - Connex Credit Union (Connecticut)
-# Market: New Haven, Hartford, Middlesex, Fairfield counties
+# Client: 1776 - CoastHills Credit Union (California)
+# Market: Santa Barbara, San Luis Obispo, Ventura counties
 # ===========================================================================
 #
 # MATCHING STRATEGY (three-tier, ordered by confidence):
@@ -9,8 +9,8 @@
 #   2. starts_with: merchant name begins with pattern (primary method)
 #   3. contains:    pattern appears anywhere in name (use sparingly)
 #
-# Consolidated from revised tiered config + original flat-list config.
-# Nothing removed unless exact duplicate.
+# Base nationals/digital/wallets/BNPL are universal.
+# Regionals and credit unions are CoastHills-specific (Central Coast CA).
 # ===========================================================================
 
 import pandas as pd
@@ -22,189 +22,89 @@ import pandas as pd
 COMPETITOR_MERCHANTS = {
 
     # =======================================================================
-    # BIG NATIONALS -- Major banks with significant CT branch presence
+    # BIG NATIONALS -- Major banks with CA branch presence
     # =======================================================================
     'big_nationals': {
         'starts_with': [
-            # Bank of America (83 CT branches)
+            # Bank of America (major CA presence)
             'BANK OF AMERICA', 'BANKOFAMERICA', 'B OF A', 'BOA ',
             'BK OF AMERICA', 'BK OF AMER',
 
-            # Wells Fargo (47 CT branches)
+            # Wells Fargo (major CA presence)
             'WELLS FARGO', 'WELLS FARGO BANK', 'WF BANK', 'WF HOME',
             'WELLSFARGO',
 
-            # JPMorgan Chase (63 CT branches)
+            # JPMorgan Chase (major CA presence)
             'CHASE BANK', 'CHASE BK', 'CHASE CREDIT', 'CHASE CARD',
             'CHASE HOME', 'CHASE AUTO', 'CHASE MTG',
             'JPMORGAN', 'JPMORGAN CHASE', 'JP MORGAN',
 
-            # Citibank (12 CT branches)
+            # Citibank
             'CITIBANK', 'CITI BANK', 'CITI CARD', 'CITICORP',
             'CITI MORTGAGE', 'CITIMORTGAGE',
-
-            # TD Bank (53 CT branches)
-            'TD BANK', 'TD BK', 'TD BANKNORTH', 'TDBANK',
-
-            # Citizens Bank (30 CT branches)
-            'CITIZENS BANK', 'CITIZENS BK', 'CITIZENS FINANCIAL',
-
-            # Santander (13 CT branches)
-            'SANTANDER', 'SANTANDER BANK',
-
-            # KeyBank (47 CT branches)
-            'KEYBANK', 'KEY BANK', 'KEY BK',
-
-            # M&T Bank (117 CT branches -- largest in state)
-            'M&T BANK', 'M&T BK', 'M AND T BANK', 'M AND T BK',
-            'MANUFACTURERS AND TRADERS',
 
             # US Bank
             'US BANK', 'U.S. BANK', 'US BK', 'USB ',
 
             # Capital One (banking arm)
             'CAPITAL ONE BK', 'CAPITAL ONE BANK', 'CAPITAL ONE 360',
-            'CAP ONE BANK', 'CAPITALONE BK',
+            'CAP ONE BANK', 'CAPITALONE BK', 'CAPITAL ONE',
 
             # PNC Bank
             'PNC BANK', 'PNC BK',
         ],
         'exact': [
-            'CHASE', 'KEYBANK', 'SANTANDER', 'BOA', 'CITI', 'CITIZENS',
+            'CHASE', 'BOA', 'CITI',
         ],
     },
 
     # =======================================================================
-    # REGIONALS -- CT community/savings banks in Connex's footprint
+    # REGIONALS -- Central Coast CA community/savings banks
     # =======================================================================
     'regionals': {
         'starts_with': [
-            # Webster Bank (95 CT branches -- 2nd largest)
-            'WEBSTER BANK', 'WEBSTER BK', 'WEBSTERBANK',
+            # Mechanics Bank (Central Coast presence)
+            'MECHANICS BANK', 'MECHANICS BK',
 
-            # Liberty Bank (51 CT branches)
-            'LIBERTY BANK', 'LIBERTY BK',
+            # Pacific Premier Bank (CA regional)
+            'PACIFIC PREMIER', 'PACIFIC PREMIER BANK', 'PACIFIC PREMIER BK',
 
-            # Ion Bank (23 CT branches)
-            'ION BANK', 'ION BK',
+            # Columbia Bank (CA regional)
+            'COLUMBIA BANK', 'COLUMBIA BK', 'COLUMBIA BANKING',
 
-            # Union Savings Bank (26 CT branches)
-            'UNION SAVINGS', 'UNION SVG',
+            # American Riviera Bank (Santa Barbara local)
+            'AMERICAN RIVIERA', 'AMERICAN RIVIERA BANK', 'AMERICAN RIVIERA BK',
 
-            # Newtown Savings Bank (19 CT branches)
-            'NEWTOWN SAVINGS', 'NEWTOWN SVG',
+            # Community Bank of Santa Maria (local)
+            'COMMUNITY BANK OF SANTA', 'COMMUNITY BANK SANTA MARIA',
+            'COMMUNITY BK SANTA MARIA',
 
-            # Beacon Bank and Trust (18 CT branches)
-            'BEACON BANK',
+            # Bank of the Sierra (CA regional)
+            'BANK OF THE SIERRA', 'BK OF THE SIERRA', 'SIERRA BANK',
 
-            # Fairfield County Bank (17 CT branches)
-            'FAIRFIELD COUNTY BANK', 'FAIRFIELD COUNTY BK',
-
-            # First County Bank (14 CT branches)
-            'FIRST COUNTY BANK', 'FIRST COUNTY BK',
-
-            # Ives Bank (16 CT branches)
-            'IVES BANK', 'IVES BK',
-
-            # Thomaston Savings Bank (16 CT branches)
-            'THOMASTON SAVINGS', 'THOMASTON SVG',
-
-            # Northwest Community Bank (15 CT branches)
-            'NORTHWEST COMMUNITY', 'NW COMMUNITY BANK',
-
-            # Chelsea Groton Bank (14 CT branches)
-            'CHELSEA GROTON',
-
-            # Ascend Bank (13 CT branches)
-            'ASCEND BANK', 'ASCEND BK',
-
-            # Windsor Federal (11 CT branches)
-            'WINDSOR FEDERAL',
-
-            # Guilford Savings Bank (in Connex's backyard)
-            'GUILFORD SAVINGS', 'GUILFORD SVG', 'GSB BANK',
-
-            # Essex Savings Bank
-            'ESSEX SAVINGS', 'ESSEX SVG',
-
-            # Milford Bank
-            'MILFORD BANK', 'THE MILFORD BANK',
-
-            # Bankwell (9 CT branches)
-            'BANKWELL',
-
-            # Patriot Bank (7 CT branches)
-            'PATRIOT BANK', 'PATRIOT BK',
-
-            # Centreville Bank (7 CT branches)
-            'CENTREVILLE BANK',
-
-            # Bank of New Haven
-            'BANK OF NEW HAVEN',
-
-            # Connecticut Community Bank (10 CT branches)
-            'CONNECTICUT COMMUNITY', 'CT COMMUNITY BANK',
-
-            # PeoplesBank (6 CT branches)
-            'PEOPLES BANK', 'PEOPLESBANK', 'PEOPLES BK',
-
-            # Savings Bank of Danbury
-            'SAVINGS BANK OF DANBURY',
-
-            # Berkshire Bank (21 CT branches)
-            'BERKSHIRE BANK', 'BERKSHIRE BK',
-
-            # NBT Bank (6 CT branches)
-            'NBT BANK', 'NBT BK',
-
-            # Dime Bank
-            'DIME BANK',
-
-            # SI Financial
-            'SI FINANCIAL',
-
-            # Washington Trust
-            'WASHINGTON TRUST',
-
-            # Savings Bank of Walpole
-            'SAVINGS BANK OF WALPOLE',
-
-            # Peoples United
-            'PEOPLES UNITED',
-
-            # First National Bank CT
-            'FIRST NATIONAL BANK CT', 'PATRIOT NATIONAL',
+            # West Coast Community Bank (local)
+            'WEST COAST COMMUNITY', 'WEST COAST COMMUNITY BANK',
+            'WEST COAST COMMUNITY BK',
         ],
         'exact': [
-            'BANKWELL',
+            'MECHANICS BANK',
         ],
     },
 
     # =======================================================================
-    # CREDIT UNIONS -- Local/regional CUs competing in Connex's market
+    # CREDIT UNIONS -- Local/regional CUs competing in CoastHills's market
     # =======================================================================
     'credit_unions': {
         'starts_with': [
-            # Direct competitors in New Haven County
-            'NEW HAVEN COUNTY CREDIT', 'NEW HAVEN COUNTY CU', 'NHCCU',
-            'CROSSPOINT FEDERAL', 'CROSSPOINT FCU', 'CROSSPOINT CU',
-            'AFFINITY FEDERAL CU', 'AFFINITY FCU', 'AFFINITY CU',
-            'USALLIANCE FINANCIAL', 'USALLIANCE FED', 'USALLIANCE',
-            'GE CREDIT UNION', 'GE CU',
-            'SCIENT FEDERAL', 'SCIENT FCU', 'SCIENT CU',
-            'SCIENCE PARK FCU', 'SCIENCE PARK FED',
-            'MUTUAL SECURITY CU', 'MUTUAL SECURITY CREDIT',
+            # SESLOC CU (San Luis Obispo -- direct competitor)
+            'SESLOC CREDIT UNION', 'SESLOC CU', 'SESLOC FEDERAL',
+            'SESLOC FCU', 'SESLOC',
 
-            # Statewide CT credit unions
-            'CT STATE EMPLOYEES CU', 'CONNECTICUT STATE EMPLOYEES',
-            'ACHIEVE FINANCIAL CU', 'ACHIEVE FINANCIAL CREDIT',
-            'NUTMEG STATE FINANCIAL', 'NUTMEG STATE CU', 'NUTMEG CU',
-            'NUTMEG STATE FCU',
-            'FINEX CREDIT UNION', 'FINEX CU', 'FINEX FCU',
-            'WESTERN CT FCU', 'WESTERN CONNECTICUT FCU',
-            'ISLAND FEDERAL CU', 'ISLAND FEDERAL CREDIT',
+            # SLO Credit Union (San Luis Obispo -- direct competitor)
+            'SLO CREDIT UNION', 'SLO CU', 'SLO FEDERAL', 'SLO FCU',
+            'SAN LUIS OBISPO CU', 'SAN LUIS OBISPO CREDIT',
 
-            # National CUs with CT presence
+            # National CUs with CA presence
             'NAVY FEDERAL', 'NAVY FED', 'NFCU',
             'GOLDEN 1 CREDIT', 'GOLDEN 1 CU',
             'PENTAGON FEDERAL', 'PENTAGON FCU', 'PENFED',
@@ -212,13 +112,9 @@ COMPETITOR_MERCHANTS = {
             'USAA',
             'ALLIANT CREDIT',
             'DIGITAL FCU',
-
-            # From original config
-            'AMERICAN EAGLE FCU',
-            'CHARTER OAK FCU',
-            'SIKORSKY FCU',
-            'TEACHERS FCU',
-            'YALE FEDERAL',
+        ],
+        'exact': [
+            'SESLOC',
         ],
     },
 
@@ -362,6 +258,7 @@ FALSE_POSITIVES = [
     'TRADER JOE',
     'CHASE OUTDOORS',
     'CURRENT ELECTRIC',
+    'COASTHILLS MARKETPLACE',
 ]
 
 
@@ -495,11 +392,11 @@ def print_config_summary(config=COMPETITOR_MERCHANTS):
 # ===========================================================================
 # ITEMS REQUIRING REVIEW
 # ===========================================================================
-# SUTTON     - Original had in wallets_p2p, not a wallet. Move to regionals?
-# LINCOLN SAVINGS - Original had in wallets_p2p, not a wallet. Move to regionals?
-# CURRENT    - Bare "CURRENT" matches "CURRENT ELECTRIC". Using "CURRENT CARD".
-# ZIP        - Bare "ZIP" too generic. Using "ZIP PAY"/"ZIPPAY".
-# SQ*        - Square payments. Using "SQ *" (with space) for starts_with.
-# MARCUS     - Bare "MARCUS" could match non-Goldman. Added as exact only.
-# GOLDMAN SACHS - Expanded to "GOLDMAN SACHS BANK" in starts_with.
+# COASTAL COMMUNITY BK - In digital_banks but could be confused with local bank.
+#   Using full "COASTAL COMMUNITY BK" prefix to avoid false matches.
+# SIERRA BANK - Could match non-"Bank of the Sierra" entities.
+#   Using "BANK OF THE SIERRA" as primary, "SIERRA BANK" as fallback.
+# SLO / SESLOC - Short prefixes. Using full names + exact matches.
+# CAPITAL ONE - Issue user listed bare "CAPITAL ONE" -- added to starts_with
+#   alongside "CAPITAL ONE BANK" variants already in base.
 # ===========================================================================

@@ -1,0 +1,80 @@
+# =============================================================================
+# Client: 1776 - CoastHills Credit Union (California)
+# Market: Santa Barbara, San Luis Obispo, Ventura counties
+# =============================================================================
+
+client_id: "1776"
+client_name: "CoastHills Credit Union"
+client_state: "CA"
+
+# --- File Paths (override per run or via Streamlit) ---
+transaction_dir: ""
+file_extension: "csv"
+odd_file: ""
+output_dir: "output/1776_CoastHills"
+
+# --- Analysis Parameters ---
+recent_months: 12
+top_n: 50
+growth_min_threshold: 1000.0
+consistency_min_spend: 10000.0
+consistency_min_months: 3
+interchange_rate: 0.015
+
+# --- Client-Specific Competitors ---
+# These get MERGED with base_competitors.yaml (additive, not replaced).
+# Only add regional banks and local CUs specific to this client's market.
+competitors:
+  regionals:
+    starts_with:
+      # Mechanics Bank (Central Coast presence)
+      - "MECHANICS BANK"
+      - "MECHANICS BK"
+      # Pacific Premier Bank (CA regional)
+      - "PACIFIC PREMIER"
+      - "PACIFIC PREMIER BANK"
+      - "PACIFIC PREMIER BK"
+      # Columbia Bank (CA regional)
+      - "COLUMBIA BANK"
+      - "COLUMBIA BK"
+      - "COLUMBIA BANKING"
+      # American Riviera Bank (Santa Barbara local)
+      - "AMERICAN RIVIERA"
+      - "AMERICAN RIVIERA BANK"
+      - "AMERICAN RIVIERA BK"
+      # Community Bank of Santa Maria (local)
+      - "COMMUNITY BANK OF SANTA"
+      - "COMMUNITY BANK SANTA MARIA"
+      - "COMMUNITY BK SANTA MARIA"
+      # Bank of the Sierra (CA regional)
+      - "BANK OF THE SIERRA"
+      - "BK OF THE SIERRA"
+      - "SIERRA BANK"
+      # West Coast Community Bank (local)
+      - "WEST COAST COMMUNITY"
+      - "WEST COAST COMMUNITY BANK"
+      - "WEST COAST COMMUNITY BK"
+    exact:
+      - "MECHANICS BANK"
+
+  credit_unions:
+    starts_with:
+      # SESLOC CU (San Luis Obispo -- direct competitor)
+      - "SESLOC CREDIT UNION"
+      - "SESLOC CU"
+      - "SESLOC FEDERAL"
+      - "SESLOC FCU"
+      - "SESLOC"
+      # SLO Credit Union (San Luis Obispo -- direct competitor)
+      - "SLO CREDIT UNION"
+      - "SLO CU"
+      - "SLO FEDERAL"
+      - "SLO FCU"
+      - "SAN LUIS OBISPO CU"
+      - "SAN LUIS OBISPO CREDIT"
+    exact:
+      - "SESLOC"
+
+# --- Client-Specific False Positives ---
+false_positives:
+  - "COASTHILLS MARKETPLACE"
