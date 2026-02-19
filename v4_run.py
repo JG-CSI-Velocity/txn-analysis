@@ -3,6 +3,7 @@
 Usage:
     python v4_run.py                    # uses v4_config.yaml in current dir
     python v4_run.py my_client.yaml     # uses specified config file
+    python v4_run.py --client 1453      # loads from configs/clients/1453.yaml
 
 Loads data, runs selected storylines, generates Excel + HTML reports.
 """
@@ -176,5 +177,16 @@ def run_all(config_path: str = "v4_config.yaml") -> None:
 
 
 if __name__ == "__main__":
-    config_file = sys.argv[1] if len(sys.argv) > 1 else "v4_config.yaml"
-    run_all(config_file)
+    if len(sys.argv) >= 3 and sys.argv[1] == "--client":
+        from v4_client_config import load_client_config
+        client_id = sys.argv[2]
+        config = load_client_config(client_id)
+        client_name = config.get("client_name", "Client")
+        print(f"\n{'=' * 80}")
+        print(f"  V4 TRANSACTION ANALYSIS")
+        print(f"  Client: {client_id} - {client_name}")
+        print(f"{'=' * 80}\n")
+        run_pipeline(config)
+    else:
+        config_file = sys.argv[1] if len(sys.argv) > 1 else "v4_config.yaml"
+        run_all(config_file)

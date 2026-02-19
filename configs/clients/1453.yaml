@@ -1,0 +1,170 @@
+# =============================================================================
+# Client: 1453 - Connex Credit Union (Connecticut)
+# Market: New Haven, Hartford, Middlesex, Fairfield counties
+# =============================================================================
+
+client_id: "1453"
+client_name: "Connex Credit Union"
+client_state: "CT"
+
+# --- File Paths (override per run or via Streamlit) ---
+transaction_dir: ""
+file_extension: "csv"
+odd_file: ""
+output_dir: "output/1453_Connex"
+
+# --- Analysis Parameters ---
+recent_months: 12
+top_n: 50
+growth_min_threshold: 1000.0
+consistency_min_spend: 10000.0
+consistency_min_months: 3
+interchange_rate: 0.015
+
+# --- Client-Specific Competitors ---
+# These get MERGED with base_competitors.yaml (additive, not replaced).
+# Only add regional banks and local CUs specific to this client's market.
+competitors:
+  regionals:
+    starts_with:
+      # Webster Bank (95 CT branches -- 2nd largest)
+      - "WEBSTER BANK"
+      - "WEBSTER BK"
+      - "WEBSTERBANK"
+      # Liberty Bank (51 CT branches)
+      - "LIBERTY BANK"
+      - "LIBERTY BK"
+      # Ion Bank (23 CT branches)
+      - "ION BANK"
+      - "ION BK"
+      # Union Savings Bank (26 CT branches)
+      - "UNION SAVINGS"
+      - "UNION SVG"
+      # Newtown Savings Bank (19 CT branches)
+      - "NEWTOWN SAVINGS"
+      - "NEWTOWN SVG"
+      # Beacon Bank and Trust (18 CT branches)
+      - "BEACON BANK"
+      # Fairfield County Bank (17 CT branches)
+      - "FAIRFIELD COUNTY BANK"
+      - "FAIRFIELD COUNTY BK"
+      # First County Bank (14 CT branches)
+      - "FIRST COUNTY BANK"
+      - "FIRST COUNTY BK"
+      # Ives Bank (16 CT branches)
+      - "IVES BANK"
+      - "IVES BK"
+      # Thomaston Savings Bank (16 CT branches)
+      - "THOMASTON SAVINGS"
+      - "THOMASTON SVG"
+      # Northwest Community Bank (15 CT branches)
+      - "NORTHWEST COMMUNITY"
+      - "NW COMMUNITY BANK"
+      # Chelsea Groton Bank (14 CT branches)
+      - "CHELSEA GROTON"
+      # Ascend Bank (13 CT branches)
+      - "ASCEND BANK"
+      - "ASCEND BK"
+      # Windsor Federal (11 CT branches)
+      - "WINDSOR FEDERAL"
+      # Guilford Savings Bank (in Connex's backyard)
+      - "GUILFORD SAVINGS"
+      - "GUILFORD SVG"
+      - "GSB BANK"
+      # Essex Savings Bank
+      - "ESSEX SAVINGS"
+      - "ESSEX SVG"
+      # Milford Bank
+      - "MILFORD BANK"
+      - "THE MILFORD BANK"
+      # Bankwell (9 CT branches)
+      - "BANKWELL"
+      # Patriot Bank (7 CT branches)
+      - "PATRIOT BANK"
+      - "PATRIOT BK"
+      # Centreville Bank (7 CT branches)
+      - "CENTREVILLE BANK"
+      # Bank of New Haven
+      - "BANK OF NEW HAVEN"
+      # Connecticut Community Bank (10 CT branches)
+      - "CONNECTICUT COMMUNITY"
+      - "CT COMMUNITY BANK"
+      # PeoplesBank (6 CT branches)
+      - "PEOPLES BANK"
+      - "PEOPLESBANK"
+      - "PEOPLES BK"
+      # Savings Bank of Danbury
+      - "SAVINGS BANK OF DANBURY"
+      # Berkshire Bank (21 CT branches)
+      - "BERKSHIRE BANK"
+      - "BERKSHIRE BK"
+      # NBT Bank (6 CT branches)
+      - "NBT BANK"
+      - "NBT BK"
+      # Dime Bank
+      - "DIME BANK"
+      # SI Financial
+      - "SI FINANCIAL"
+      # Washington Trust
+      - "WASHINGTON TRUST"
+      # Savings Bank of Walpole
+      - "SAVINGS BANK OF WALPOLE"
+      # Peoples United
+      - "PEOPLES UNITED"
+      # First National Bank CT
+      - "FIRST NATIONAL BANK CT"
+      - "PATRIOT NATIONAL"
+    exact:
+      - "BANKWELL"
+
+  credit_unions:
+    starts_with:
+      # Direct competitors in New Haven County
+      - "NEW HAVEN COUNTY CREDIT"
+      - "NEW HAVEN COUNTY CU"
+      - "NHCCU"
+      - "CROSSPOINT FEDERAL"
+      - "CROSSPOINT FCU"
+      - "CROSSPOINT CU"
+      - "AFFINITY FEDERAL CU"
+      - "AFFINITY FCU"
+      - "AFFINITY CU"
+      - "USALLIANCE FINANCIAL"
+      - "USALLIANCE FED"
+      - "USALLIANCE"
+      - "GE CREDIT UNION"
+      - "GE CU"
+      - "SCIENT FEDERAL"
+      - "SCIENT FCU"
+      - "SCIENT CU"
+      - "SCIENCE PARK FCU"
+      - "SCIENCE PARK FED"
+      - "MUTUAL SECURITY CU"
+      - "MUTUAL SECURITY CREDIT"
+      # Statewide CT credit unions
+      - "CT STATE EMPLOYEES CU"
+      - "CONNECTICUT STATE EMPLOYEES"
+      - "ACHIEVE FINANCIAL CU"
+      - "ACHIEVE FINANCIAL CREDIT"
+      - "NUTMEG STATE FINANCIAL"
+      - "NUTMEG STATE CU"
+      - "NUTMEG CU"
+      - "NUTMEG STATE FCU"
+      - "FINEX CREDIT UNION"
+      - "FINEX CU"
+      - "FINEX FCU"
+      - "WESTERN CT FCU"
+      - "WESTERN CONNECTICUT FCU"
+      - "ISLAND FEDERAL CU"
+      - "ISLAND FEDERAL CREDIT"
+      # CT CUs from original config
+      - "AMERICAN EAGLE FCU"
+      - "CHARTER OAK FCU"
+      - "SIKORSKY FCU"
+      - "TEACHERS FCU"
+      - "YALE FEDERAL"
+      - "CINFED CU"
+
+# --- Client-Specific False Positives ---
+false_positives:
+  - "CONNEX MARKETPLACE"

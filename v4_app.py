@@ -16,6 +16,7 @@ if str(_HERE) not in sys.path:
 
 import streamlit as st
 
+from v4_client_config import list_clients, load_client_config
 from v4_data_loader import load_config
 from v4_run import STORYLINE_LABELS, run_pipeline
 
@@ -89,12 +90,30 @@ with st.sidebar:
             file_ext = st.selectbox("Type", ["csv", "txt"])
 
         st.subheader("Client")
+        configured_clients = list_clients()
+        client_options = ["(manual entry)"] + configured_clients
+        chosen = st.selectbox("Saved client", client_options, index=0)
+
+        # Auto-fill from saved config
+        _prefill: dict = {}
+        if chosen != "(manual entry)":
+            try:
+                _prefill = load_client_config(chosen)
+            except Exception:
+                _prefill = {}
+
         id_col, name_col = st.columns(2)
         with id_col:
-            client_id = st.text_input("ID", value="", placeholder="e.g. 1453")
+            client_id = st.text_input(
+                "ID",
+                value=_prefill.get("client_id", ""),
+                placeholder="e.g. 1453",
+            )
         with name_col:
             client_name = st.text_input(
-                "Name", value="", placeholder="e.g. Connex CU"
+                "Name",
+                value=_prefill.get("client_name", ""),
+                placeholder="e.g. Connex CU",
             )
 
         st.subheader("Storylines")
@@ -157,9 +176,13 @@ st.session_state["last_odd_path"] = odd_path.strip()
 # ---------------------------------------------------------------------------
 # Build config
 # ---------------------------------------------------------------------------
-config_path = _HERE / "v4_config.yaml"
-config = load_config(str(config_path)) if config_path.exists() else {}
+if chosen != "(manual entry)" and _prefill:
+    config = dict(_prefill)
+else:
+    config_path = _HERE / "v4_config.yaml"
+    config = load_config(str(config_path)) if config_path.exists() else {}
 
+# Form values always override (user may have edited them)
 config["transaction_dir"] = txn_dir.strip()
 config["file_extension"] = file_ext
 config["odd_file"] = odd_path.strip()
